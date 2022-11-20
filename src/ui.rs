@@ -59,7 +59,7 @@ where
 
     // Draw tasks
     let tasks: Vec<ListItem> = app
-        .tasks
+        .tables
         .items
         .iter()
         .map(|i| ListItem::new(vec![Spans::from(Span::raw(*i))]))
@@ -68,7 +68,7 @@ where
         .block(Block::default().borders(Borders::ALL).title("List"))
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
         .highlight_symbol("> ");
-    f.render_stateful_widget(tasks, left_top_left, &mut app.tasks.state);
+    f.render_stateful_widget(tasks, left_top_left, &mut app.tables.state);
 
     // Draw logs
     let logs = Block::default().borders(Borders::ALL).title("Indexes");

@@ -1,9 +1,7 @@
 use tui::widgets::ListState;
 
-const TASKS: [&str; 24] = [
-    "Item1", "Item2", "Item3", "Item4", "Item5", "Item6", "Item7", "Item8", "Item9", "Item10",
-    "Item11", "Item12", "Item13", "Item14", "Item15", "Item16", "Item17", "Item18", "Item19",
-    "Item20", "Item21", "Item22", "Item23", "Item24",
+const TABLES: [&str; 9] = [
+    "Table1", "Table2", "Table3", "Table4", "Table5", "Table6", "Table7", "Table8", "Table9",
 ];
 
 pub struct TabsState<'a> {
@@ -74,7 +72,7 @@ pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
-    pub tasks: StatefulList<&'a str>,
+    pub tables: StatefulList<&'a str>,
     pub enhanced_graphics: bool,
 }
 
@@ -84,17 +82,17 @@ impl<'a> App<'a> {
             title,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
-            tasks: StatefulList::with_items(TASKS.to_vec()),
+            tables: StatefulList::with_items(TABLES.to_vec()),
             enhanced_graphics,
         }
     }
 
     pub fn on_up(&mut self) {
-        self.tasks.previous();
+        self.tables.previous();
     }
 
     pub fn on_down(&mut self) {
-        self.tasks.next();
+        self.tables.next();
     }
 
     pub fn on_right(&mut self) {
