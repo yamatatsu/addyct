@@ -47,7 +47,7 @@ fn main_loop<B: Backend>(
     mut app: App,
     tick_rate: Duration,
 ) -> io::Result<()> {
-    let mut last_tick = Instant::now();
+    let last_tick = Instant::now();
     loop {
         terminal.draw(|f| ui::draw(f, &mut app))?;
 
@@ -65,10 +65,6 @@ fn main_loop<B: Backend>(
                     _ => {}
                 }
             }
-        }
-        if last_tick.elapsed() >= tick_rate {
-            app.on_tick();
-            last_tick = Instant::now();
         }
         if app.should_quit {
             return Ok(());
