@@ -73,17 +73,15 @@ pub struct App<'a> {
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
     pub tables: StatefulList<&'a str>,
-    pub enhanced_graphics: bool,
 }
 
 impl<'a> App<'a> {
-    pub fn new(title: &'a str, enhanced_graphics: bool) -> App<'a> {
+    pub fn new(title: &'a str) -> App<'a> {
         App {
             title,
             should_quit: false,
             tabs: TabsState::new(vec!["Tab0", "Tab1"]),
             tables: StatefulList::with_items(TABLES.to_vec()),
-            enhanced_graphics,
         }
     }
 
