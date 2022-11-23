@@ -68,10 +68,77 @@ impl<T> StatefulList<T> {
     }
 }
 
+#[derive(Clone, Copy)]
+pub enum Mode {
+    FocusOnTab,
+    FocusOnTable,
+    FocusOnOperation,
+    FocusOnItem,
+}
+enum ArrowKey {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+pub struct ModeState {
+    pub mode: Mode,
+}
+impl ModeState {
+    pub fn new() -> ModeState {
+        ModeState {
+            mode: Mode::FocusOnTab,
+        }
+    }
+    pub fn on_up(&mut self) {
+        self.on_arrow_key(ArrowKey::Up)
+    }
+
+    pub fn on_down(&mut self) {
+        self.on_arrow_key(ArrowKey::Down)
+    }
+
+    pub fn on_left(&mut self) {
+        self.on_arrow_key(ArrowKey::Left)
+    }
+
+    pub fn on_right(&mut self) {
+        self.on_arrow_key(ArrowKey::Right)
+    }
+
+    fn on_arrow_key(&mut self, arrow_key: ArrowKey) {
+        match (self.mode, arrow_key) {
+            (Mode::FocusOnTab, ArrowKey::Up) => {}
+            (Mode::FocusOnTab, ArrowKey::Down) => self.mode = Mode::FocusOnTable,
+            (Mode::FocusOnTab, ArrowKey::Left) => {}
+            (Mode::FocusOnTab, ArrowKey::Right) => self.mode = Mode::FocusOnItem,
+
+            (Mode::FocusOnTable, ArrowKey::Up) => self.mode = Mode::FocusOnTab,
+            (Mode::FocusOnTable, ArrowKey::Down) => self.mode = Mode::FocusOnOperation,
+            (Mode::FocusOnTable, ArrowKey::Left) => {}
+            (Mode::FocusOnTable, ArrowKey::Right) => self.mode = Mode::FocusOnItem,
+
+            (Mode::FocusOnOperation, ArrowKey::Up) => self.mode = Mode::FocusOnTable,
+            (Mode::FocusOnOperation, ArrowKey::Down) => {}
+            (Mode::FocusOnOperation, ArrowKey::Left) => {}
+            (Mode::FocusOnOperation, ArrowKey::Right) => self.mode = Mode::FocusOnItem,
+
+            (Mode::FocusOnItem, ArrowKey::Up) => {}
+            (Mode::FocusOnItem, ArrowKey::Down) => {}
+            (Mode::FocusOnItem, ArrowKey::Left) => self.mode = Mode::FocusOnTable,
+            (Mode::FocusOnItem, ArrowKey::Right) => {}
+        }
+    }
+
+    pub fn on_key(&mut self, c: char) {}
+}
+
 pub struct App<'a> {
     pub title: &'a str,
     pub should_quit: bool,
     pub tabs: TabsState<'a>,
+    pub mode: ModeState,
+    pub focus: bool,
     pub tables: StatefulList<&'a str>,
 }
 
@@ -80,25 +147,63 @@ impl<'a> App<'a> {
         App {
             title,
             should_quit: false,
-            tabs: TabsState::new(vec!["Tab0", "Tab1"]),
+            tabs: TabsState::new(vec!["Operation", "History"]),
+            mode: ModeState::new(),
+            focus: false,
             tables: StatefulList::with_items(TABLES.to_vec()),
         }
     }
 
+    pub fn on_enter(&mut self) {
+        self.focus = true
+    }
+
+    pub fn on_esc(&mut self) {
+        self.focus = false
+    }
+
     pub fn on_up(&mut self) {
-        self.tables.previous();
+        if !self.focus {
+            self.mode.on_up();
+            return;
+        }
+        match self.mode.mode {
+            Mode::FocusOnTable => self.tables.previous(),
+            _ => {}
+        }
     }
 
     pub fn on_down(&mut self) {
-        self.tables.next();
-    }
-
-    pub fn on_right(&mut self) {
-        self.tabs.next();
+        if !self.focus {
+            self.mode.on_down();
+            return;
+        }
+        match self.mode.mode {
+            Mode::FocusOnTable => self.tables.next(),
+            _ => {}
+        }
     }
 
     pub fn on_left(&mut self) {
-        self.tabs.previous();
+        if !self.focus {
+            self.mode.on_left();
+            return;
+        }
+        match self.mode.mode {
+            Mode::FocusOnTab => self.tabs.previous(),
+            _ => {}
+        }
+    }
+
+    pub fn on_right(&mut self) {
+        if !self.focus {
+            self.mode.on_right();
+            return;
+        }
+        match self.mode.mode {
+            Mode::FocusOnTab => self.tabs.next(),
+            _ => {}
+        }
     }
 
     pub fn on_key(&mut self, c: char) {

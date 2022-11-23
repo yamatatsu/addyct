@@ -1,4 +1,4 @@
-use crate::app::App;
+use crate::app::{App, Mode};
 use tui::{
     backend::Backend,
     layout::{Constraint, Direction, Layout, Rect},
@@ -19,7 +19,15 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
         .map(|t| Spans::from(Span::styled(*t, Style::default().fg(Color::Green))))
         .collect();
     let tabs = Tabs::new(titles)
-        .block(Block::default().borders(Borders::ALL).title(app.title))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(match app.mode.mode {
+                    Mode::FocusOnTab => Color::White,
+                    _ => Color::DarkGray,
+                }))
+                .title(app.title),
+        )
         .highlight_style(Style::default().fg(Color::Yellow))
         .select(app.tabs.index);
     f.render_widget(tabs, chunks[0]);
@@ -65,16 +73,33 @@ where
         .map(|i| ListItem::new(vec![Spans::from(Span::raw(*i))]))
         .collect();
     let tasks = List::new(tasks)
-        .block(Block::default().borders(Borders::ALL).title("List"))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(match app.mode.mode {
+                    Mode::FocusOnTable => Color::White,
+                    _ => Color::DarkGray,
+                }))
+                .title("List"),
+        )
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
         .highlight_symbol("> ");
     f.render_stateful_widget(tasks, left_top_left, &mut app.tables.state);
 
     // Draw logs
-    let logs = Block::default().borders(Borders::ALL).title("Indexes");
+    let logs = Block::default()
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(Color::DarkGray))
+        .title("Indexes");
     f.render_widget(logs, left_top_right);
 
-    let operations = Block::default().borders(Borders::ALL).title("Operations");
+    let operations = Block::default()
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(match app.mode.mode {
+            Mode::FocusOnOperation => Color::White,
+            _ => Color::DarkGray,
+        }))
+        .title("Operations");
     f.render_widget(operations, left_bottom);
 
     let item_table = Table::new(vec![
@@ -89,7 +114,15 @@ where
             .style(Style::default().fg(Color::Yellow))
             .bottom_margin(1),
     )
-    .block(Block::default().title("Items").borders(Borders::ALL))
+    .block(
+        Block::default()
+            .title("Items")
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(match app.mode.mode {
+                Mode::FocusOnItem => Color::White,
+                _ => Color::DarkGray,
+            })),
+    )
     .widths(&[
         Constraint::Length(5),
         Constraint::Length(5),

@@ -1,6 +1,6 @@
 use crate::{app::App, ui};
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, ModifierKeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -58,6 +58,8 @@ fn main_loop<B: Backend>(
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char(c) => app.on_key(c),
+                    KeyCode::Enter => app.on_enter(),
+                    KeyCode::Esc => app.on_esc(),
                     KeyCode::Left => app.on_left(),
                     KeyCode::Up => app.on_up(),
                     KeyCode::Right => app.on_right(),
